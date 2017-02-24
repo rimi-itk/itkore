@@ -34,7 +34,7 @@ function itkore_form_install_configure_submit($form, FormStateInterface $form_st
   \Drupal::service('module_installer')
     ->install(['itk_paragraph']);
 
-	itkore_aarhus_dk_hacks();
+  itkore_aarhus_dk_hacks();
 }
 
 function itkore_aarhus_dk_hacks() {
@@ -71,17 +71,24 @@ function itkore_aarhus_dk_hacks() {
   $password = 'editor2017';
 
   // Create editor user.
-  $user = \Drupal\user\Entity\User::create();
-  $user->setUsername($username);
-  $user->setEmail($email);
-  $user->setPassword($password);
-  $user->addRole($role);
-  $user->activate();
-  $user->save();
+  $editor = user_load_by_name('editor');
+  if (!$editor) {
+    $editor = \Drupal\user\Entity\User::create();
+    $editor->setUsername($editorname);
+    $editor->setEmail($email);
+    $editor->setPassword($password);
+    $editor->addRole($role);
+    $editor->activate();
+    $admin->set('langcode', $langcode);
+    $admin->set('preferred_langcode', $langcode);
+    $editor->save();
+  }
 
-  drupal_set_message(t('@usertype with username @username and password @password created', [
-    '@usertype' => ucfirst($role),
-    '@username' => $username,
-    '@password' => $password,
-  ]));
+  // Set admin user default language.
+  $admin = user_load_by_name('admin');
+  if ($admin) {
+    $admin->set('langcode', $langcode);
+    $admin->set('preferred_langcode', $langcode);
+    $admin->save();
+  }
 }
