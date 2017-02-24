@@ -71,16 +71,16 @@ function itkore_aarhus_dk_hacks() {
   $password = 'editor2017';
 
   // Create editor user.
-  $editor = user_load_by_name('editor');
+  $editor = user_load_by_name($username);
   if (!$editor) {
     $editor = \Drupal\user\Entity\User::create();
-    $editor->setUsername($editorname);
+    $editor->setUsername($username);
     $editor->setEmail($email);
     $editor->setPassword($password);
     $editor->addRole($role);
     $editor->activate();
-    $admin->set('langcode', $langcode);
-    $admin->set('preferred_langcode', $langcode);
+    $editor->set('langcode', $langcode);
+    $editor->set('preferred_langcode', $langcode);
     $editor->save();
   }
 
