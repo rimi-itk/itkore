@@ -34,15 +34,18 @@ function itkore_form_install_configure_submit($form, FormStateInterface $form_st
   \Drupal::service('module_installer')
     ->install(['itk_paragraph']);
 
+	itkore_aarhus_dk_hacks();
+}
 
+function itkore_aarhus_dk_hacks() {
   // aarhus.dk hacks
   \Drupal::service('module_installer')
     ->install(['itkore_intro', 'itkore_default_content']);
 
   \Drupal::service('module_installer')
-    ->uninstall(['update', 'itk_cookie_message']);
+    ->uninstall(['update']);
 
-  // Create Danish locale and set as default
+  // Create Danish locale
   $langcode = 'da';
   \Drupal::service('module_installer')->install(['language']);
   if (!($language = entity_load('configurable_language', $langcode))) {
@@ -51,5 +54,34 @@ function itkore_form_install_configure_submit($form, FormStateInterface $form_st
   }
   $language->save();
 
-  \Drupal::service('language.default')->set($language);
+  // Set default language
+  \Drupal::configFactory()->getEditable('system.site')->set('default_langcode', $langcode)->save();
+
+  // Import translations
+  $file = (object)[
+    'uri' => drupal_get_path('profile', 'itkore') . '/translations/itkore.da.po',
+    'langcode' => 'da',
+  ];
+  $options = [];
+  $result = \Drupal\locale\Gettext::fileToDatabase($file, $options);
+
+  $role = 'editor';
+  $username = 'editor';
+  $email = 'editor@example.com';
+  $password = 'editor2017';
+
+  // Create editor user.
+  $user = \Drupal\user\Entity\User::create();
+  $user->setUsername($username);
+  $user->setEmail($email);
+  $user->setPassword($password);
+  $user->addRole($role);
+  $user->activate();
+  $user->save();
+
+  drupal_set_message(t('@usertype with username @username and password @password created', [
+    '@usertype' => ucfirst($role),
+    '@username' => $username,
+    '@password' => $password,
+  ]));
 }
