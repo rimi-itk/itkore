@@ -32,7 +32,6 @@ dependencies:
   - toolbar
   - views
   - views_ui
-  - update
   - user
   - page_cache
   - dynamic_page_cache

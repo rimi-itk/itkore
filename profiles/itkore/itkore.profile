@@ -33,4 +33,23 @@ function itkore_form_install_configure_submit($form, FormStateInterface $form_st
 
   \Drupal::service('module_installer')
     ->install(['itk_paragraph']);
+
+
+  // aarhus.dk hacks
+  \Drupal::service('module_installer')
+    ->install(['itkore_intro', 'itkore_default_content']);
+
+  \Drupal::service('module_installer')
+    ->uninstall(['update', 'itk_cookie_message']);
+
+  // Create Danish locale and set as default
+  $langcode = 'da';
+  \Drupal::service('module_installer')->install(['language']);
+  if (!($language = entity_load('configurable_language', $langcode))) {
+    // Create the language if not already shipped with a profile.
+    $language = ConfigurableLanguage::createFromLangcode($langcode);
+  }
+  $language->save();
+
+  \Drupal::service('language.default')->set($language);
 }
